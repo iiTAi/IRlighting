@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <M5Unified.h>
+#include <M5StickCPlus.h>
 #include <IRremoteESP8266.h>
 #include <IRsend.h>
 
@@ -24,14 +24,12 @@ const uint16_t rawData_nl[115] = {9076, 4536,  560, 1672,  584, 544,  582, 566, 
 char modeStr[15];
 enum modes mode;
 
-auto cfg = M5.config();
-
 IRsend irsend(IrLed);  // Set the pin to be used to sending the signal.
 
 void setup() {
-  M5.begin(cfg);
+  M5.begin();
   irsend.begin();
-
+  Serial.begin(115200);
   mode = darken;
 }
 
@@ -44,6 +42,8 @@ void loop() {
         irsend.sendRaw(rawData_dk, 115, 38);
       else if (M5.BtnB.wasPressed())
         mode = brighten;
+      else if (M5.Axp.GetBtnPress() == 2)
+        mode = nightLight;
       break;
     }
     case brighten: {
@@ -52,6 +52,8 @@ void loop() {
         irsend.sendRaw(rawData_bt, 115, 38);
       else if (M5.BtnB.wasPressed())
         mode = sleepTimer;
+      else if (M5.Axp.GetBtnPress() == 2)
+        mode = darken;
       break;
     }
     case sleepTimer: {
@@ -60,6 +62,8 @@ void loop() {
         irsend.sendRaw(rawData_st, 115, 38);
       else if (M5.BtnB.wasPressed())
         mode = allOn;
+      else if (M5.Axp.GetBtnPress() == 2)
+        mode = brighten;
       break;
     }
     case allOn: {
@@ -68,6 +72,8 @@ void loop() {
         irsend.sendRaw(rawData_on, 115, 38);
       else if (M5.BtnB.wasPressed())
         mode = allOff;
+      else if (M5.Axp.GetBtnPress() == 2)
+        mode = sleepTimer;
       break;
     }
     case allOff: {
@@ -76,6 +82,8 @@ void loop() {
         irsend.sendRaw(rawData_of, 115, 38);
       else if (M5.BtnB.wasPressed())
         mode = nightLight;
+      else if (M5.Axp.GetBtnPress() == 2)
+        mode = allOn;
       break;
     }
     case nightLight: {
@@ -84,18 +92,19 @@ void loop() {
         irsend.sendRaw(rawData_nl, 115, 38);
       else if (M5.BtnB.wasPressed())
         mode = darken;
-
+      else if (M5.Axp.GetBtnPress() == 2)
+        mode = allOff;
       break;
     }
   }
-  M5.Display.startWrite();
-  M5.Display.setRotation(1);
-  M5.Display.setCursor(24, 35);
-  M5.Display.setTextSize(3);
-  M5.Display.print("MODE:");
-  M5.Display.setCursor(24, 70);
-  M5.Display.setTextSize(3);
-  M5.Display.printf("%-15s", modeStr);
-  M5.Display.endWrite();
+
+  M5.Lcd.setRotation(1);
+  M5.Lcd.setCursor(24, 35);
+  M5.Lcd.setTextSize(3);
+  M5.Lcd.print("MODE:");
+  M5.Lcd.setCursor(24, 70);
+  M5.Lcd.setTextSize(3);
+  M5.Lcd.printf("%-15s", modeStr);
+
   delay(100);
 }
